@@ -1,3 +1,3 @@
-# Introduction to brave-book
+# Introduction to restful-api
 
 TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)
