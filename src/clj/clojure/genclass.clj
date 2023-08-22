@@ -412,15 +412,26 @@
                                                                (. super-type (getInternalName))
                                                                (. m (getName))
                                                                (. m (getDescriptor)))))))
-                                        ;add methods matching interfaces', if no fn -> throw
+                                        ;add methods matching interfaces', if no fn and not default -> throw
       (reduce1 (fn [mm ^java.lang.reflect.Method meth]
-                (if (contains? mm (method-sig meth))
-                  mm
-                  (do
-                    (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
-                                            emit-unsupported)
-                    (assoc mm (method-sig meth) meth))))
-              mm (mapcat #(.getMethods ^Class %) interfaces))
+                 (if (contains? mm (method-sig meth))
+                   mm
+                   (do
+                     (emit-forwarding-method (.getName meth) (.getParameterTypes meth) (.getReturnType meth) false
+                                             (fn [^GeneratorAdapter gen ^Method m]
+                                               (if (.isDefault meth)
+                                                 ;call interface method super
+                                                 (do
+                                                   (. gen (loadThis))
+                                                   (. gen (loadArgs))
+                                                   (. gen (visitMethodInsn (. Opcodes INVOKESPECIAL)
+                                                                           (iname (.getDeclaringClass meth))
+                                                                           (. m (getName))
+                                                                           (. m (getDescriptor))
+                                                                           true)))
+                                                 (emit-unsupported gen m))))
+                     (assoc mm (method-sig meth) meth))))
+               mm (mapcat #(.getMethods ^Class %) interfaces))
                                         ;extra methods
        (doseq [[mname pclasses rclass :as msig] methods]
          (emit-forwarding-method mname pclasses rclass (:static (meta msig))

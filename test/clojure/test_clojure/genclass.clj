@@ -13,6 +13,7 @@
   (:require clojure.test_clojure.genclass.examples)
   (:import [clojure.test_clojure.genclass.examples
             ExampleClass
+            ExampleJavaClass
             ExampleAnnotationClass
             ProtectedFinalTester
             ArrayDefInterface
@@ -36,6 +37,14 @@
            (get-field ExampleClass 'foo_Object_int__var)))
     (is (= #'clojure.test-clojure.genclass.examples/-toString
            (get-field ExampleClass 'toString__var)))))
+
+(deftest default-method-java-interfaces
+  (testing "default methods do not need implementations"
+    (let [example (ExampleJavaClass.)]
+      (is (= "name-from-implementation-1" (.notDefaultName example)))
+      (is (= "name-from-interface-1" (.defaultName example)))
+      (is (= "name-from-implementation-2" (.implementedDefaultName example)))
+      (is (thrown? java.lang.UnsupportedOperationException (.notImplementedNotDefaultName example))))))
 
 ;todo - fix this, it depends on the order of things out of a hash-map
 #_(deftest test-annotations

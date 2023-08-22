@@ -31,6 +31,14 @@
 
 (declare -toString)
 
+(gen-class :name clojure.test_clojure.genclass.examples.ExampleJavaClass
+           :prefix "ex-"
+           :implements [clojure.test.genclass.examples.ExampleJavaInterface])
+
+(defn ex-notDefaultName [_] "name-from-implementation-1")
+
+(defn ex-implementedDefaultName [_] "name-from-implementation-2")
+
 (gen-class :name ^{Deprecated {}
                    SuppressWarnings ["Warning1"] ; discarded
                    java.lang.annotation.Target []}
